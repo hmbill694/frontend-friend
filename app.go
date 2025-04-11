@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"frontend-friend/backend/database"
 )
 
 // App struct
 type App struct {
 	ctx context.Context
+	db  *sql.DB
 }
 
 // NewApp creates a new App application struct
@@ -19,6 +22,24 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	_, err := database.CreateDB()
+
+	if err != nil {
+		panic(err)
+	}
+
+	db, err := database.CreateConnection()
+
+	if err != nil {
+		panic(err)
+	}
+
+	a.db = db
+}
+
+func (a *App) shutdown(ctx context.Context) {
+	a.db.Close()
 }
 
 // Greet returns a greeting for the given name
