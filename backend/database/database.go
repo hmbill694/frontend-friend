@@ -2,9 +2,12 @@ package database
 
 import (
 	"database/sql"
-	_ "github.com/tursodatabase/go-libsql"
+	"embed"
 	"log/slog"
 	"os"
+
+	"github.com/pressly/goose/v3"
+	_ "github.com/tursodatabase/go-libsql"
 )
 
 const (
@@ -63,5 +66,26 @@ func CreateConnection() (*sql.DB, error) {
 	}
 
 	slog.Info("Successfully connect to database.")
+
 	return db, nil
+}
+
+//go:embed migrations/*.sql
+var embedMigrations embed.FS
+
+func RunMigrations(db *sql.DB) error {
+	// Get a list of migration files
+	slog.Info("Running Migrations...")
+
+	goose.SetBaseFS(embedMigrations)
+
+	if err := goose.SetDialect("sqlite3"); err != nil {
+		return err
+	}
+
+	if err := goose.Up(db, "migrations"); err != nil {
+		return err
+	}
+
+	return nil
 }

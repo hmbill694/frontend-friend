@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"frontend-friend/backend/database"
+	"log/slog"
 )
 
 // App struct
@@ -36,6 +37,12 @@ func (a *App) startup(ctx context.Context) {
 	}
 
 	a.db = db
+
+	err = database.RunMigrations(a.db)
+
+	if err != nil {
+		slog.Error(fmt.Sprintf("%v", err))
+	}
 }
 
 func (a *App) shutdown(ctx context.Context) {
