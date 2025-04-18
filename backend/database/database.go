@@ -74,7 +74,6 @@ func CreateConnection() (*sql.DB, error) {
 var embedMigrations embed.FS
 
 func RunMigrations(db *sql.DB) error {
-	// Get a list of migration files
 	slog.Info("Running Migrations...")
 
 	goose.SetBaseFS(embedMigrations)
