@@ -2,31 +2,22 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	graphnodes "frontend-friend/backend/graph-nodes"
+	"frontend-friend/backend/models"
 
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langgraphgo/graph"
 )
 
 func CreateGraph() (*graph.Runnable, error) {
-	model, err := openai.New()
+	model, err := models.NewGeminiModel("gemini-2.0-flash")
 	if err != nil {
 		panic(err)
 	}
 
 	g := graph.NewMessageGraph()
 
-	g.AddNode("oracle", func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
-		r, err := model.GenerateContent(ctx, state, llms.WithTemperature(0.0))
-		if err != nil {
-			return nil, err
-		}
-		return append(state,
-			llms.TextParts(llms.ChatMessageTypeAI, r.Choices[0].Content),
-		), nil
-
-	})
+	g.AddNode("html_generator", graphnodes.HTMLGenerator(model))
 
 	g.AddNode(graph.END, func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
 		return state, nil
