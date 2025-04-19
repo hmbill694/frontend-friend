@@ -3,6 +3,7 @@ package graphnodes
 import (
 	"context"
 	"fmt"
+	"frontend-friend/backend/models"
 	"strings"
 
 	"github.com/tmc/langchaingo/llms"
@@ -20,16 +21,12 @@ type DefaultGraphState any
 
 type GraphStepFunction[GS DefaultGraphState] func(state GS) (map[string]interface{}, error)
 
-type BaseChatModel interface {
-	Call(ctx context.Context, prompt string) (string, error)
-}
-
 type ChatMessage struct {
 	Content string
 	Role    string
 }
 
-func HTMLGenerator(llm BaseChatModel) func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
+func HTMLGenerator(llm models.ChatModel) func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
 	return func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
 		userInput := state[len(state)-1]
 

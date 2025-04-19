@@ -5,13 +5,19 @@ import (
 	"database/sql"
 	"fmt"
 	"frontend-friend/backend/database"
-	"log/slog"
+	actiongraphs "frontend-friend/backend/graph"
+	"frontend-friend/backend/models"
+	"frontend-friend/backend/utils"
+
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langgraphgo/graph"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
-	db  *sql.DB
+	ctx                context.Context
+	db                 *sql.DB
+	htmlGeneratorGraph *graph.Runnable
 }
 
 // NewApp creates a new App application struct
@@ -26,23 +32,27 @@ func (a *App) startup(ctx context.Context) {
 
 	_, err := database.CreateDB()
 
-	if err != nil {
-		panic(err)
-	}
+	utils.PanicIfError(err)
 
 	db, err := database.CreateConnection()
 
-	if err != nil {
-		panic(err)
-	}
+	utils.PanicIfError(err)
 
 	a.db = db
 
 	err = database.RunMigrations(a.db)
 
-	if err != nil {
-		slog.Error(fmt.Sprintf("%v", err))
-	}
+	utils.PanicIfError(err)
+
+	geminiModel, err := models.NewGeminiModel("gemini-2.0-flash")
+
+	utils.PanicIfError(err)
+
+	htmlGraph, err := actiongraphs.CreateGraphHtmlGeneratorGraph(geminiModel)
+
+	utils.PanicIfError(err)
+
+	a.htmlGeneratorGraph = htmlGraph
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -52,4 +62,13 @@ func (a *App) shutdown(ctx context.Context) {
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
+}
+
+func (a *App) GenerateHTMLPage(userPrompt string) bool {
+
+	a.htmlGeneratorGraph.Invoke(a.ctx, []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "a todo app"),
+	})
+
+	return false
 }

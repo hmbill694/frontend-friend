@@ -5,6 +5,7 @@ go 1.23.0
 toolchain go1.23.3
 
 require (
+	github.com/joho/godotenv v1.5.1
 	github.com/tursodatabase/go-libsql v0.0.0-20250401144753-0be9a6ec7849
 	github.com/wailsapp/wails/v2 v2.9.2
 )

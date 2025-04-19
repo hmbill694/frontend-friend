@@ -1,4 +1,4 @@
-package graph
+package actiongraphs
 
 import (
 	"context"
@@ -9,12 +9,7 @@ import (
 	"github.com/tmc/langgraphgo/graph"
 )
 
-func CreateGraph() (*graph.Runnable, error) {
-	model, err := models.NewGeminiModel("gemini-2.0-flash")
-	if err != nil {
-		panic(err)
-	}
-
+func CreateGraphHtmlGeneratorGraph(model models.ChatModel) (*graph.Runnable, error) {
 	g := graph.NewMessageGraph()
 
 	g.AddNode("html_generator", graphnodes.HTMLGenerator(model))
